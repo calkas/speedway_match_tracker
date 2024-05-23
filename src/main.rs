@@ -1,11 +1,23 @@
-use speedway_match_tracker::smt_app_data::AppData;
+use speedway_match_tracker::smt_app::App;
+use speedway_match_tracker::tui::Tui;
+use std::error;
+
+//Convert result to general result
+pub type AppResult<T> = std::result::Result<T, Box<dyn error::Error>>;
 
 #[tokio::main]
-async fn main() {
-    let mut app = AppData::default();
-    app.get_data_from_server().await;
+async fn main() -> AppResult<()> {
+    let mut app = App::default();
+    app.fetch_data().await;
 
-    println!("{}", app.match_information);
-    println!("{}", app.table_super_league);
-    println!("{}", app.table_1_league);
+    let mut tui = Tui::new()?;
+    tui.enter()?;
+
+    while app.is_running {
+        tui.draw(&mut app)?;
+    }
+
+    tui.exit()?;
+
+    Ok(())
 }

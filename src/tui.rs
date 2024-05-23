@@ -1,26 +1,43 @@
-use std::io::{self, stdout, Stdout};
+use crossterm::terminal::EnterAlternateScreen;
+use crossterm::terminal::LeaveAlternateScreen;
 
-use crossterm::{execute, terminal::*};
+use ratatui::backend::CrosstermBackend;
 use ratatui::prelude::*;
+use std::io::stdout;
+use std::io::Result;
+
+use crate::smt_app::App;
+use crate::view_ui;
 
 /// TUI - terminal user interface
 ///
 /// It is responsible for setting up the terminal,
 /// initializing the interface and handling the draw events.
-
-/// A type alias for the terminal type used in this application
-pub type Tui = Terminal<CrosstermBackend<Stdout>>;
-
-/// Initialize the terminal
-pub fn init() -> io::Result<Tui> {
-    execute!(stdout(), EnterAlternateScreen)?;
-    enable_raw_mode()?;
-    Terminal::new(CrosstermBackend::new(stdout()))
+pub struct Tui {
+    terminal: Terminal<CrosstermBackend<std::io::Stdout>>,
 }
 
-/// Restore the terminal to its original state
-pub fn restore() -> io::Result<()> {
-    execute!(stdout(), LeaveAlternateScreen)?;
-    disable_raw_mode()?;
-    Ok(())
+impl Tui {
+    pub fn new() -> Result<Self> {
+        let backend = CrosstermBackend::new(stdout());
+        let terminal: Terminal<CrosstermBackend<std::io::Stdout>> = Terminal::new(backend)?;
+        Ok(Self { terminal })
+    }
+
+    pub fn enter(&self) -> Result<()> {
+        crossterm::execute!(stdout(), EnterAlternateScreen)?;
+        crossterm::terminal::enable_raw_mode()?;
+        Ok(())
+    }
+
+    pub fn exit(&self) -> Result<()> {
+        crossterm::execute!(stdout(), LeaveAlternateScreen)?;
+        crossterm::terminal::disable_raw_mode()?;
+        Ok(())
+    }
+
+    pub fn draw(&mut self, app: &mut App) -> Result<()> {
+        self.terminal.draw(|frame| view_ui::render(app, frame))?;
+        Ok(())
+    }
 }
