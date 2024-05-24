@@ -32,7 +32,8 @@ async fn get_speedway_table(url: String) -> Result<String, Error> {
     let res = reqwest::get(url).await?;
     let text = res.text().await?;
     let document = Html::parse_document(&text);
-    let selector = Selector::parse(r"body > div.conter > div.overflowing > div > div.smallpadding_box > table.tabela_ligowa.striped_table").unwrap();
+
+    let selector = Selector::parse(r"body > div.conter > i > div.overflowing > div > div.smallpadding_box > table.tabela_ligowa.striped_table").unwrap();
 
     let mut team_score: Vec<SpeedwayScoreTable> = Vec::new();
     let mut team_element = SpeedwayScoreTable {
