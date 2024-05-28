@@ -9,6 +9,8 @@ use std::io::Result;
 use crate::smt_app::App;
 use crate::view_ui;
 
+use crossterm::event::{self, KeyCode, KeyEventKind};
+
 /// TUI - terminal user interface
 ///
 /// It is responsible for setting up the terminal,
@@ -39,5 +41,17 @@ impl Tui {
     pub fn draw(&mut self, app: &mut App) -> Result<()> {
         self.terminal.draw(|frame| view_ui::render(app, frame))?;
         Ok(())
+    }
+
+    pub fn handle_event(&self) -> Result<bool> {
+        if event::poll(std::time::Duration::from_millis(16))? {
+            if let event::Event::Key(key) = event::read()? {
+                if key.kind == KeyEventKind::Press && key.code == KeyCode::Char('q') {
+                    return Ok(false);
+                }
+            }
+        }
+
+        Ok(true)
     }
 }

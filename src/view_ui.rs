@@ -1,22 +1,10 @@
 use crate::smt_app::App;
-
-use crossterm::style::Stylize;
-use ratatui::{
-    layout::{self, Constraint, Direction, Layout},
-    prelude::{Alignment, Rect},
-    style::{Color, Style},
-    text::Line,
-    widgets::{block::Title, Block, Borders, Paragraph},
-    Frame,
-};
+use ratatui::prelude::*;
+use ratatui::widgets::block::Position;
+use ratatui::widgets::{block::Title, Block, Borders, Paragraph};
 
 pub fn render(app: &mut App, frame: &mut Frame) {
-    let header = Block::default()
-        .borders(Borders::ALL)
-        .title(Title::from("Speedway Match Tracker").alignment(Alignment::Center))
-        .title_style(Style::default().fg(Color::Cyan));
-
-    frame.render_widget(header, frame.size());
+    main_ui(frame);
 
     let layout = Layout::default()
         .direction(Direction::Vertical)
@@ -28,33 +16,59 @@ pub fn render(app: &mut App, frame: &mut Frame) {
         ])
         .split(frame.size());
 
-    frame.render_widget(
-        Paragraph::new(app.data.match_information.clone()).block(
-            Block::new()
-                .title("Match Information")
-                .title_alignment(Alignment::Center)
-                .borders(Borders::ALL),
-        ),
-        layout[0],
-    );
+    match_calendar_ui(app.data.match_information.clone(), frame, layout[0]);
 
-    frame.render_widget(
-        Paragraph::new(app.data.table_super_league.clone()).block(
-            Block::new()
-                .title("Super League Table")
-                .title_alignment(Alignment::Center)
-                .borders(Borders::ALL),
-        ),
+    match_table_ui(
+        "PGE Ekstraliga".to_owned(),
+        app.data.table_super_league.clone(),
+        frame,
         layout[1],
     );
 
+    match_table_ui(
+        "Metalkas 2. Ekstraliga".to_owned(),
+        app.data.table_1_league.clone(),
+        frame,
+        layout[2],
+    );
+}
+
+fn main_ui(frame: &mut Frame) {
+    let app_name = Title::from("Speedway Match Tracker".blue().bold());
+    let instructions = Title::from(Line::from(vec![" Quit ".into(), "<q> ".blue().bold()]));
+
+    let header = Block::default()
+        .borders(Borders::ALL)
+        .title(app_name.alignment(Alignment::Center))
+        .title(
+            instructions
+                .alignment(Alignment::Center)
+                .position(Position::Bottom),
+        );
+
+    frame.render_widget(header, frame.size());
+}
+
+fn match_calendar_ui(table_content: String, frame: &mut Frame, layout: Rect) {
     frame.render_widget(
-        Paragraph::new(app.data.table_1_league.clone()).block(
+        Paragraph::new(table_content).block(
             Block::new()
-                .title("1 League Table")
-                .title_alignment(Alignment::Center)
+                .title("Match calendar")
+                .title_alignment(Alignment::Left)
                 .borders(Borders::ALL),
         ),
-        layout[2],
+        layout,
+    );
+}
+
+fn match_table_ui(name: String, table_content: String, frame: &mut Frame, layout: Rect) {
+    frame.render_widget(
+        Paragraph::new(table_content).block(
+            Block::new()
+                .title(name)
+                .title_alignment(Alignment::Left)
+                .borders(Borders::ALL),
+        ),
+        layout,
     );
 }

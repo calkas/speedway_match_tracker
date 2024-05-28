@@ -18,7 +18,7 @@ async fn get_speedway_match_report() -> Result<String, Error> {
     let mut result = String::new();
     for e in inner.split("Przejdź do relacji") {
         let temp = format!("{}\n", e);
-        if temp == String::from("  Wszystkie wyniki                                   \n") {
+        if temp == "  Wszystkie wyniki                                   \n" {
             continue;
         }
         result.push_str(&temp);
@@ -32,8 +32,7 @@ async fn get_speedway_table(url: String) -> Result<String, Error> {
     let res = reqwest::get(url).await?;
     let text = res.text().await?;
     let document = Html::parse_document(&text);
-
-    let selector = Selector::parse(r"body > div.conter > i > div.overflowing > div > div.smallpadding_box > table.tabela_ligowa.striped_table").unwrap();
+    let selector = Selector::parse(r"body > div.conter > div.overflowing > div > div.smallpadding_box > table.tabela_ligowa.striped_table").unwrap();
 
     let mut team_score: Vec<SpeedwayScoreTable> = Vec::new();
     let mut team_element = SpeedwayScoreTable {
@@ -45,14 +44,12 @@ async fn get_speedway_table(url: String) -> Result<String, Error> {
     let mut index: usize = 0;
     let mut start_counting = false;
 
-    let skip: usize = 27;
-
     for elem in document.select(&selector) {
         for (e, txt) in elem.text().enumerate() {
             if e < 27 {
                 continue;
             }
-            if txt.chars().nth(0).unwrap().is_alphabetic()
+            if txt.chars().next().unwrap().is_alphabetic()
                 && txt.chars().last().unwrap().is_alphabetic()
             {
                 team_element.team_name = txt.to_string();
@@ -60,19 +57,17 @@ async fn get_speedway_table(url: String) -> Result<String, Error> {
                 index = e;
             }
 
-            if start_counting {
-                if e == index + score_index {
-                    team_element.match_points = txt.parse().unwrap();
+            if start_counting && e == index + score_index {
+                team_element.match_points = txt.parse().unwrap();
 
-                    start_counting = false;
-                    team_score.push(SpeedwayScoreTable {
-                        team_name: team_element.team_name.clone(),
-                        match_points: team_element.match_points,
-                    });
+                start_counting = false;
+                team_score.push(SpeedwayScoreTable {
+                    team_name: team_element.team_name.clone(),
+                    match_points: team_element.match_points,
+                });
 
-                    team_element.team_name.clear();
-                    team_element.match_points = 0;
-                }
+                team_element.team_name.clear();
+                team_element.match_points = 0;
             }
         }
     }
@@ -86,20 +81,11 @@ async fn get_speedway_table(url: String) -> Result<String, Error> {
     Ok(result)
 }
 
+#[derive(Default)]
 pub struct AppData {
     pub match_information: String,
     pub table_super_league: String,
     pub table_1_league: String,
-}
-
-impl Default for AppData {
-    fn default() -> Self {
-        Self {
-            match_information: Default::default(),
-            table_super_league: Default::default(),
-            table_1_league: Default::default(),
-        }
-    }
 }
 
 impl AppData {

@@ -15,6 +15,7 @@ async fn main() -> AppResult<()> {
 
     while app.is_running {
         tui.draw(&mut app)?;
+        app.is_running = tui.handle_event()?;
     }
 
     tui.exit()?;
