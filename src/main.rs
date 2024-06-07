@@ -8,14 +8,19 @@ pub type AppResult<T> = std::result::Result<T, Box<dyn error::Error>>;
 #[tokio::main]
 async fn main() -> AppResult<()> {
     let mut app = App::default();
-    app.fetch_data().await;
+    //app.fetch_data().await;r
+
+    let mut first = true;
 
     let mut tui = Tui::new()?;
     tui.enter()?;
 
     while app.is_running {
         tui.draw(&mut app)?;
-        app.is_running = tui.handle_event()?;
+        if first {
+            app.fetch_data().await;
+        }
+        let _ = tui.handle_event(&mut app).await;
     }
 
     tui.exit()?;

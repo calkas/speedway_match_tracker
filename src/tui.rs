@@ -43,15 +43,23 @@ impl Tui {
         Ok(())
     }
 
-    pub fn handle_event(&self) -> Result<bool> {
+    pub async fn handle_event(&mut self, app: &mut App) -> Result<()> {
         if event::poll(std::time::Duration::from_millis(16))? {
             if let event::Event::Key(key) = event::read()? {
                 if key.kind == KeyEventKind::Press && key.code == KeyCode::Char('q') {
-                    return Ok(false);
+                    app.is_running = false;
+                }
+
+                if key.kind == KeyEventKind::Press && key.code == KeyCode::Char('r') {
+                    app.data.match_information = String::from("Refreshing...");
+                    app.data.table_1_league = String::from("Refreshing...");
+                    app.data.table_super_league = String::from("Refreshing...");
+                    let _ = self.draw(app);
+                    app.fetch_data().await;
                 }
             }
         }
 
-        Ok(true)
+        Ok(())
     }
 }

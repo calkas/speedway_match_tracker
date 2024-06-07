@@ -19,14 +19,14 @@ pub fn render(app: &mut App, frame: &mut Frame) {
     match_calendar_ui(app.data.match_information.clone(), frame, layout[0]);
 
     match_table_ui(
-        "PGE Ekstraliga".to_owned(),
+        " PGE Ekstraliga ".to_owned(),
         app.data.table_super_league.clone(),
         frame,
         layout[1],
     );
 
     match_table_ui(
-        "Metalkas 2. Ekstraliga".to_owned(),
+        " Metalkas 2. Ekstraliga ".to_owned(),
         app.data.table_1_league.clone(),
         frame,
         layout[2],
@@ -34,8 +34,13 @@ pub fn render(app: &mut App, frame: &mut Frame) {
 }
 
 fn main_ui(frame: &mut Frame) {
-    let app_name = Title::from("Speedway Match Tracker".blue().bold());
-    let instructions = Title::from(Line::from(vec![" Quit ".into(), "<q> ".blue().bold()]));
+    let app_name = Title::from(" Speedway Match Tracker ".blue().bold());
+    let instructions = Title::from(Line::from(vec![
+        " Quit ".into(),
+        "<q> ".blue().bold(),
+        " Refresh ".into(),
+        "<r> ".blue().bold(),
+    ]));
 
     let header = Block::default()
         .borders(Borders::ALL)
@@ -53,7 +58,7 @@ fn match_calendar_ui(table_content: String, frame: &mut Frame, layout: Rect) {
     frame.render_widget(
         Paragraph::new(table_content).block(
             Block::new()
-                .title("Match calendar")
+                .title(" Match calendar ")
                 .title_alignment(Alignment::Left)
                 .borders(Borders::ALL),
         ),
